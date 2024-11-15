@@ -33,7 +33,7 @@ function Show-ScaryMessage {
 function Open-RandomWebsite {
     $websites = @(
         "https://www.youtube.com/watch?v=dQw4w9WgXcQ",  
-        "https://www.newyorker.com/news/daily-comment/monkey-see-monkey-click",
+        "https://tenor.com/view/monkey-news-stare-gif-26455378",
         "https://www.youtube.com/watch?v=YbJOTdZBX1g",
         "https://www.youtube.com/watch?v=HzL8lh39Y2Q",
         "https://www.youtube.com/watch?v=RoKDsK8_ToQ",
