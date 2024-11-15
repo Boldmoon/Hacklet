@@ -15,24 +15,25 @@ public class HiddenWindow {
 "@
 [HiddenWindow]::Hide()
 
-function Show-RandomMessage {
+function Show-ScaryMessage {
     $messages = @(
-        "kys",
-        "You have been hacked.",
-        "Cry about it.",
-        "You are cooked.",
-        "Performing self destruction",
-        "Please stanby, we are erasing your system.",
-        "What ra?"
+        "ALERT! SYSTEM COMPROMISED!",
+        "Your files are now under our control.",
+        "SELF-DESTRUCT INITIATED! Get out now.",
+        "Warning! Your system is about to crash!",
+        "Please standby, we are erasing your system!!",
+        "You are being monitored. No escape.",
+        "Emergency! This message will self-destruct.",
+        "We are in your network. Prepare for consequences."
     )
     $randomMessage = $messages | Get-Random
-    [System.Windows.Forms.MessageBox]::Show($randomMessage, "International Threat", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
+    [System.Windows.Forms.MessageBox]::Show($randomMessage, "Critical System Alert", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Stop)
 }
 
 function Open-RandomWebsite {
     $websites = @(
         "https://www.youtube.com/watch?v=dQw4w9WgXcQ",  
-        "https://tenor.com/view/monkey-news-stare-gif-26455378",
+        "https://www.newyorker.com/news/daily-comment/monkey-see-monkey-click",
         "https://www.youtube.com/watch?v=YbJOTdZBX1g",
         "https://www.youtube.com/watch?v=HzL8lh39Y2Q",
         "https://www.youtube.com/watch?v=RoKDsK8_ToQ",
@@ -43,22 +44,34 @@ function Open-RandomWebsite {
 }
 
 function Play-Sound {
-    [console]::beep(500, 300)  
-    Start-Sleep -Milliseconds 300
+    $sounds = @(
+        { [console]::beep(1000, 500) },  
+        { [console]::beep(2000, 800) },  
+        { [console]::beep(500, 300) },   
+        { [console]::beep(1000, 1500) }  
+    )
+    $randomSound = $sounds | Get-Random
+    $randomSound.Invoke()
 }
 
 for ($i = 0; $i -lt 10; $i++) {
     $randomInterval = Get-Random -Minimum 2 -Maximum 3
     Start-Sleep -Minutes $randomInterval
 
-    Show-RandomMessage
+    Show-ScaryMessage
     Start-Sleep -Seconds 3
+
+    $randomInterval = Get-Random -Minimum 2 -Maximum 3
+    Start-Sleep -Minutes $randomInterval
 
     Open-RandomWebsite
     Start-Sleep -Seconds 3
+
+    $randomInterval = Get-Random -Minimum 2 -Maximum 3
+    Start-Sleep -Minutes $randomInterval
 
     Play-Sound
     Start-Sleep -Seconds 3
 }
 
-[System.Windows.Forms.MessageBox]::Show("Location reported to CIA.", "You are done.", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
+[System.Windows.Forms.MessageBox]::Show("Location reported to CIA.", "FINAL WARNING", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
