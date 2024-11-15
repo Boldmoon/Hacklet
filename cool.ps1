@@ -81,8 +81,6 @@ function FlashScreen {
         }
     }
     "@
-    [FlashWindow]::Flash()
-"@
     Invoke-Expression $flashScript
 }
 
