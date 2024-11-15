@@ -18,11 +18,11 @@ public class HiddenWindow {
 function Show-RandomMessage {
     $messages = @(
         "kys",
-        "You have been hacked",
-        "Cry about it",
-        "You are cooked",
+        "You have been hacked.",
+        "Cry about it.",
+        "You are cooked.",
         "Performing self destruction",
-        "Please stanby, we are erasing your system",
+        "Please stanby, we are erasing your system.",
         "What ra?"
     )
     $randomMessage = $messages | Get-Random
