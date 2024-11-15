@@ -1,3 +1,4 @@
+Add-Type -AssemblyName "System.Windows.Forms"
 Add-Type -TypeDefinition @"
 using System;
 using System.Runtime.InteropServices;
@@ -13,7 +14,6 @@ public class HiddenWindow {
 }
 "@
 [HiddenWindow]::Hide()
-
 
 function Show-RandomMessage {
     $messages = @(
@@ -32,7 +32,7 @@ function Show-RandomMessage {
 function Open-RandomWebsite {
     $websites = @(
         "https://www.youtube.com/watch?v=dQw4w9WgXcQ",  
-        "https://www.newyorker.com/news/daily-comment/monkey-see-monkey-click",
+        "https://tenor.com/view/monkey-news-stare-gif-26455378",
         "https://www.youtube.com/watch?v=YbJOTdZBX1g",
         "https://www.youtube.com/watch?v=HzL8lh39Y2Q",
         "https://www.youtube.com/watch?v=RoKDsK8_ToQ",
@@ -42,19 +42,23 @@ function Open-RandomWebsite {
     Start-Process $randomWebsite
 }
 
-
 function Play-Sound {
     [console]::beep(500, 300)  
     Start-Sleep -Milliseconds 300
 }
 
-
 for ($i = 0; $i -lt 10; $i++) {
-    Start-Sleep -Seconds (Get-Random -Minimum 1 -Maximum 3)
-    Show-RandomMessage
-    Open-RandomWebsite
-    Play-Sound
-}
+    $randomInterval = Get-Random -Minimum 2 -Maximum 3
+    Start-Sleep -Minutes $randomInterval
 
+    Show-RandomMessage
+    Start-Sleep -Seconds 3
+
+    Open-RandomWebsite
+    Start-Sleep -Seconds 3
+
+    Play-Sound
+    Start-Sleep -Seconds 3
+}
 
 [System.Windows.Forms.MessageBox]::Show("Location reported to CIA.", "You are done.", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
