@@ -1,42 +1,24 @@
 $errorActionPreference = 'SilentlyContinue'
 
-Add-Type -AssemblyName "System.Windows.Forms"
-Add-Type -TypeDefinition @"
-using System;
-using System.Runtime.InteropServices;
-public class HiddenWindow {
-    [DllImport("user32.dll")]
-    public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-    [DllImport("kernel32.dll")]
-    public static extern IntPtr GetConsoleWindow();
-    public static void Hide() {
-        IntPtr hWnd = GetConsoleWindow();
-        ShowWindow(hWnd, 0);
-    }
-}
-"@
-[HiddenWindow]::Hide()
-
-function Random-ScreenEffects {
-    $effects = @(
-        { [System.Windows.Forms.SystemSounds]::Beep.Play() },
-        { 
-            $cmd = "rundll32 user32.dll,SwapMouseButton"
-            Invoke-Expression $cmd
-        },
-        { 
-            $cursor = [System.IntPtr]::Zero
-            [System.Windows.Forms.Cursor]::Current = [System.Windows.Forms.Cursors]::No
-        },
-        {
-            [System.Windows.Forms.Screen]::LockDisplayOrientation([System.Windows.Forms.ScreenOrientation]::Landscape)
-        }
+function Play-RandomSound {
+    $sounds = @(
+        [System.Windows.Forms.SystemSounds]::Beep,
+        [System.Windows.Forms.SystemSounds]::Asterisk,
+        [System.Windows.Forms.SystemSounds]::Exclamation,
+        [System.Windows.Forms.SystemSounds]::Hand,
+        [System.Windows.Forms.SystemSounds]::Question
     )
-    $randomEffect = $effects | Get-Random
-    $randomEffect.Invoke()
+    $randomSound = $sounds | Get-Random
+    $randomSound.Play()
 }
 
-function FlashScreen {
+function Change-MouseCursor {
+    $cursorTypes = [System.Windows.Forms.Cursors].GetEnumValues() | Where-Object { $_ -ne [System.Windows.Forms.Cursors]::Default }
+    $randomCursor = $cursorTypes | Get-Random
+    [System.Windows.Forms.Cursor]::Current = $randomCursor
+}
+
+function Flash-Screen {
     $flashColors = @("Red", "Blue", "Green", "Yellow", "Pink")
     $randomColor = $flashColors | Get-Random
     $flashScript = {
@@ -51,45 +33,31 @@ function FlashScreen {
     Invoke-Command $flashScript
 }
 
-function Random-Madness {
-    $madnessActions = @(
-        { FlashScreen },
-        { Random-ScreenEffects },
-        { 
-            Start-Process "cmd"
-            Start-Sleep -Seconds 2
-            Get-Process "cmd" | Stop-Process -Force
-        },
-        { 
-            [console]::beep(700, 2000)
-            Start-Sleep -Seconds 1
-            [console]::beep(1200, 100)
+function Minimize-Maximize-Windows {
+    $visibleWindows = Get-Process | Where-Object { $_.MainWindowHandle -ne 0 }
+    foreach ($window in $visibleWindows) {
+        if ((Get-Random -Minimum 0 -Maximum 2) -eq 0) {
+            $window.MainWindowHandle | Out-Null
+            [System.Windows.Forms.SendKeys]::SendWait("{F9}")
+        } else {
+            $window.MainWindowHandle | Out-Null
+            [System.Windows.Forms.SendKeys]::SendWait("{F10}")
         }
-    )
-    $madAction = $madnessActions | Get-Random
-    $madAction.Invoke()
+    }
 }
 
-function Trigger-FinalPhase {
-    $finalPhaseActions = @(
-        { 
-            [System.Windows.Forms.MessageBox]::Show("SYSTEM INFECTION: YOU CANNOT ESCAPE.", "ERROR: FULL SYSTEM COMPROMISED", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Critical)
-            Start-Sleep -Seconds 1
-        },
-        { 
-            Start-Process "explorer.exe"
-            Start-Sleep -Seconds 1
-            Get-Process "explorer" | Stop-Process -Force
-        },
-        {
-            [System.Windows.Forms.MessageBox]::Show("This is it. It's over.", "GOODBYE.", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
-        }
+function Trigger-SystemError {
+    $errorMessages = @(
+        "SYSTEM_SERVICE_EXCEPTION",
+        "ATTEMPTED_EXECUTE_OF_NOEXECUTE_MEMORY",
+        "KMODE_EXCEPTION_NOT_HANDLED",
+        "SYSTEM_THREAD_EXCEPTION_NOT_HANDLED"
     )
-    $randomFinalAction = $finalPhaseActions | Get-Random
-    $randomFinalAction.Invoke()
+    $randomError = $errorMessages | Get-Random
+    throw $randomError
 }
 
-function Kill-Switch {
+function Exit-Madness {
     $key = [System.Windows.Forms.Keys]::Control -bor [System.Windows.Forms.Keys]::Shift -bor [System.Windows.Forms.Keys]::K
     $keyListener = New-Object System.Windows.Forms.Form
     $keyListener.KeyPreview = $true
@@ -102,11 +70,19 @@ function Kill-Switch {
     $keyListener.ShowDialog()
 }
 
-Start-Job { Kill-Switch }
+Start-Job { Exit-Madness }
 
 while ($true) {
-    Start-Sleep -Seconds (Get-Random -Minimum 1 -Maximum 3)
-    Random-Madness
-    Start-Sleep -Seconds (Get-Random -Minimum 2 -Maximum 5)
-    Trigger-FinalPhase
+    Play-RandomSound
+    Change-MouseCursor
+    Flash-Screen
+    Minimize-Maximize-Windows
+
+    try {
+        Trigger-SystemError
+    } catch {
+
+    }
+
+    Start-Sleep -Seconds (Get-Random -Minimum 1 -Maximum 5)
 }
