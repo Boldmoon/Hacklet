@@ -1,4 +1,3 @@
-# Import .NET classes
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -TypeDefinition @"
 using System;
@@ -48,7 +47,7 @@ Function ShowFunMessage {
         "ALERT! SYSTEM COMPROMISED!"
     )
     $message = $messages | Get-Random
-    [System.Windows.Forms.MessageBox]::Show($message, "Fun Alert!")
+    [System.Windows.Forms.MessageBox]::Show($message, "International Threat")
 }
 
 Function CheckForStopShortcut {
